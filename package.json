@@ -1,0 +1,28 @@
+{
+    "name": "aws-shop-be",
+    "version": "1.0.0",
+    "description": "Backend API Project for AWS cloud development with Node.js",
+    "author": "Begum",
+    "main": "handler.js",
+    "scripts": {
+        "build": "webpack --mode=development",
+        "deploy": "serverless deploy",
+        "test": "node --experimental-modules --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "offline": "sls offline --noPrependStageInUrl",
+        "offline-start": "serverless offline start"
+    },
+    "dependencies": {
+        "serverless": "^3.22.0",
+        "serverless-auto-swagger": "^2.8.2",
+        "serverless-webpack": "^5.9.1",
+        "webpack": "^5.74.0",
+        "webpack-node-externals": "^3.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.0.3",
+        "serverless-auto-swagger": "^2.8.2",
+        "serverless-offline": "^10.1.0",
+        "webpack-cli": "^4.10.0"
+    },
+    "license": "ISC"
+}
