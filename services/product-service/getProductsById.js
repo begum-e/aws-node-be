@@ -1,24 +1,61 @@
-const { createResponse } = require('../helpers/createResponse');
-const { products } = require('./mocks/products');
+const { createResponse } = require("../helpers/createResponse");
+const { formatObjResponse } = require("../helpers/formatResponse");
+const { DynamoDB } = require("aws-sdk");
+const { PRODUCTS_TABLE, STOCKS_TABLE, REGION } = process.env;
+const dynamoDb = new DynamoDB.DocumentClient({ region: REGION });
 
 module.exports.getProductsById = async (event) => {
+  let result;
+  let statusCode = 200;
 
-    if(!products){
-       return createResponse(404, "Unable to load Products. Try again later")
-    }
-    const productId = event.pathParameters.productId;
+  console.info("*** Checking DB Connection ***");
+  if (!dynamoDb) {
+    return createResponse(500, "Connection Failed");
+  }
 
-    if(!productId){
-      return createResponse(404, "Please enter product id")
-   }
-    const product = products.find((item) => {
-        return item.id === productId;
+  console.log("*** Getting Product: ", event.pathParameters);
+
+  const pathParameters = event.pathParameters;
+  if (!pathParameters) {
+    return createResponse(500, "Missing pathParameters");
+  }
+
+  const foundProduct = await dynamoDb
+    .get({ TableName: PRODUCTS_TABLE, Key: { id: pathParameters.productId } })
+    .promise()
+    .then((res) => {
+      console.log("*** Product:", res);
+      return res;
     })
-    
-    if(!product) {
-      return createResponse(404,  `Opps! Cannot find product with id ${productId}`)
-    };
+    .catch((err) => {
+      console.error("*** Error: ", err.message);
+      return createResponse(500, err.message);
+    });
 
+  const foundStock = await dynamoDb
+    .get({ TableName: STOCKS_TABLE, Key: { product_id: pathParameters.productId } })
+    .promise()
+    .then((res) => {
+      console.log("*** Stock:", res);
+      return res;
+    })
+    .catch((err) => {
+      console.error("*** Error: ", err.message);
+      return createResponse(500, err.message);
+    });
 
-    return createResponse(200,  product);
-}
+  try {
+    console.info("*** Joining results ***");
+    result = formatObjResponse(foundProduct, foundStock);
+
+    if (!result) {
+      return createResponse(404, "Product has not stock!");
+    }
+  } catch (err) {
+    console.error("*** Error: ", err.message);
+    return createResponse(500, err.message);
+  }
+  console.log("*** Result: ", result, " StatusCode:", statusCode);
+
+  return createResponse(statusCode, result);
+};

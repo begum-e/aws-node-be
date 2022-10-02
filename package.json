@@ -5,18 +5,22 @@
     "author": "Begum",
     "main": "handler.js",
     "scripts": {
-        "build": "webpack --mode=development",
+        "build": "webpack",
         "deploy": "serverless deploy",
+        "createTable": "npm run ./scripts/createTable.js",
+        "fillTables": "npm run ./scripts/fillTables.js",
         "test": "node --experimental-modules --experimental-vm-modules node_modules/jest/bin/jest.js",
         "offline": "sls offline --noPrependStageInUrl",
         "offline-start": "serverless offline start"
     },
     "dependencies": {
+        "dotenv": "^16.0.3",
         "serverless": "^3.22.0",
-        "serverless-auto-swagger": "^2.8.2",
         "serverless-webpack": "^5.9.1",
         "webpack": "^5.74.0",
-        "webpack-node-externals": "^3.0.0"
+        "webpack-node-externals": "^3.0.0",
+        "@aws-sdk/lib-dynamodb": "^3.181.0",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "jest": "^29.0.3",

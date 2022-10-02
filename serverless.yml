@@ -13,7 +13,7 @@ service: aws-shop-be
 #org: your-org-name
 
 frameworkVersion: '3'
-
+useDotenv: true
 plugins:
   - serverless-auto-swagger # should be first
   - serverless-offline
@@ -24,6 +24,10 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: eu-west-1
+  environment: 
+    PRODUCTS_TABLE: ${env:PRODUCTS_TABLE}
+    STOCKS_TABLE: ${env:STOCKS_TABLE}
+    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
 
 functions:
   getProductsList:
@@ -40,37 +44,60 @@ functions:
           path: /products/{productId}
           method: get
           cors: true
-          responseData: {
-              200: {
-                description: 'Product with provided productId.',
-                bodyType: 'Product',
-              },
-              404: {
-                description: `ProductId is not found.`,
-              },
-            }
-
+  createProduct:
+    handler: handler.createProduct
+    events:
+      - http:
+          path: /products
+          method: post
+          cors: true
 
 package:
-  include:
-    - handler.js
-    - services/**
   exclude:
     - node_modules/**
-
 custom: 
+#  serverless-offline:
+#        httpPort: 4000
+#        lambdaPort: 4002
   webpack: 
     webpackConfig: 'webpack.config.js'
-    webpack includeModules: false
+    includeModules: true
     packager:  'npm'
-    excludeFiles: /*.test.js
+    excludeFiles: ["*.d.js","*.d.ts", "*.py", "/*.test.js"]
   autoswagger: 
     title: 'Product service API'
-    typefiles: './src/types/product.ts'
-    basePath: '/dev'
-    useStage: true
+    typefiles: ['./src/types/product.ts', './src/types/stock.ts']
     schemes: ['https', 'http']
-    apiType: 'httpApi'
+    basePath: '/dev'
+
+
+resources:
+  Resources:
+    products:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    stocks:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: product_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1     
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
