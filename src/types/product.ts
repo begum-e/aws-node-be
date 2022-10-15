@@ -1,3 +1,4 @@
+// needed for swagger generator
 export interface Product {
   id: string;
   title: string;
