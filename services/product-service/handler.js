@@ -1,9 +1,9 @@
 "use strict";
 
 require("dotenv").config();
-const { getProductsList } = require("./services/product-service/getProductsList");
-const { getProductsById } = require("./services/product-service/getProductsById");
-const { createProduct } = require("./services/product-service/createProduct");
+const { getProductsList } = require("./getProductsList");
+const { getProductsById } = require("./getProductsById");
+const { createProduct } = require("./createProduct");
 
 module.exports.getProductsList = getProductsList;
 module.exports.getProductsById = getProductsById;
