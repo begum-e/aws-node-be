@@ -5,10 +5,7 @@ const awsMock = require('aws-sdk-mock');
 awsMock.mock('DynamoDB.DocumentClient', 'put', '');
 
 const event = {
-	Records: [
-		{ body: '{"title":"t1","description":"d1","price":5,"count":5}' },
-		{ body: '{"title":"t2","description":"d2","price":10,"count":10}' },
-	],
+	Records: [{ body: '{"title":"t1","description":"d1","price":5,"count":5}' }, { body: '{"title":"t2","description":"d2","price":10,"count":10}' }],
 };
 
 describe('catalogBatchProcess', () => {
@@ -41,9 +38,7 @@ describe('catalogBatchProcess', () => {
 
 	it('Should Not processed invalid record type', async () => {
 		const event = {
-			Records: [
-				{ body: { title: 'title1', description: 'desc1', price: '5' } },
-			],
+			Records: [{ body: { title: 'title1', description: 'desc1', price: '5' } }],
 		};
 
 		const response = await catalogBatchProcess({});

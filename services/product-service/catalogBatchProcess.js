@@ -5,7 +5,6 @@ const AWS = require('aws-sdk');
 
 module.exports.catalogBatchProcess = async (event) => {
 	console.log('** catalogBatchProcess started:', event);
-
 	try {
 		const dynamodb = new AWS.DynamoDB.DocumentClient();
 		const sns = new AWS.SNS({ region: REGION });
@@ -15,29 +14,15 @@ module.exports.catalogBatchProcess = async (event) => {
 				console.log('** record:', record);
 
 				if (!validProduct(record.body)) {
-					return {
-						statusCode: 400,
-						body: 'Invalid data',
-					};
+					return { statusCode: 400, body: 'Invalid data' };
 				}
 				const newRecord = JSON.parse(record.body);
 
 				console.log('** createProduct:', newRecord);
 				const { count, ...newProductInfo } = newRecord;
 				const newStockInfo = { product_id: newRecord.id, count };
-				await dynamodb
-					.put({
-						TableName: PRODUCTS_TABLE,
-						Item: newProductInfo,
-					})
-					.promise();
-				await dynamodb
-					.put({
-						TableName: STOCKS_TABLE,
-						Item: newStockInfo,
-					})
-					.promise();
-
+				await dynamodb.put({ TableName: PRODUCTS_TABLE, Item: newProductInfo }).promise();
+				await dynamodb.put({ TableName: STOCKS_TABLE, Item: newStockInfo }).promise();
 				console.log('** New Item created:', newRecord);
 
 				const params = {
@@ -73,13 +58,7 @@ module.exports.catalogBatchProcess = async (event) => {
 
 const validProduct = (data) => {
 	const { count, description, price, title } = data;
-
-	if (
-		typeof count !== 'number' ||
-		typeof description !== 'string' ||
-		typeof price !== 'number' ||
-		typeof title !== 'string'
-	) {
+	if (typeof count !== 'number' || typeof description !== 'string' || typeof price !== 'number' || typeof title !== 'string') {
 		console.log('** Data Validation error', data);
 
 		return {
