@@ -19,11 +19,13 @@ plugins:
   - serverless-offline
   - serverless-webpack
 
-#custom:
-#  webpack:
-#    webpackConfig: ./webpack.config.js
-#    includeModules: true
-
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true
+    packager: 'npm'
+    excludeFiles: ['/*.test.js']
+    excludeRegex: .test.js
 provider:
   name: aws
   runtime: nodejs14.x
@@ -80,17 +82,17 @@ functions:
           batchSize: 5
 
 package:
-  webpack:
-    webpackConfig: './webpack.config.js'
-    includeModules: true
-    packager: 'npm'
-    excludeFiles: ['*.d.js', '*.d.ts', '*.py', '/*.test.js']
+  #webpack:
+  #  webpackConfig: 'webpack.config.js'
+  #  includeModules: true
+  #  packager: 'npm'
+  #  excludeFiles: ['*.d.js', '*.d.ts', '*.py', '/*.test.js']
   autoswagger:
     title: 'Product service API'
     typefiles: ['./types/product.ts', './types/stock.ts']
     schemes: ['https', 'http']
     basePath: '/dev'
-  individually: true
+  #individually: true
   # exclude:
   #   - node_modules/**
 
