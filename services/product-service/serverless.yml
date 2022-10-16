@@ -19,15 +19,33 @@ plugins:
   - serverless-offline
   - serverless-webpack
 
+#custom:
+#  webpack:
+#    webpackConfig: ./webpack.config.js
+#    includeModules: true
 
 provider:
   name: aws
   runtime: nodejs14.x
-  region: eu-west-1
-  environment: 
+  region: ${env:REGION}
+
+  environment:
     PRODUCTS_TABLE: ${env:PRODUCTS_TABLE}
     STOCKS_TABLE: ${env:STOCKS_TABLE}
     NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
+    SQS_QUEUE_URL: { Ref: 'SQSQueue' }
+    SNS_TOPIC_ARN: { Ref: 'SNSTopic' }
+    SNS_TOPIC_NAME: ${env:SNS_TOPIC_NAME}
+    SNS_SUBSCRIPTION_EMAIL: ${env:SNS_SUBSCRIPTION_EMAIL}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:*
+      Resource: { 'Fn::GetAtt': ['SQSQueue', 'Arn'] }
+    - Effect: Allow
+      Action:
+        - sns:*
+      Resource: { Ref: 'SNSTopic' }
 
 functions:
   getProductsList:
@@ -51,25 +69,30 @@ functions:
           path: /products
           method: post
           cors: true
+  catalogBatchProcess:
+    handler: handler.catalogBatchProcess
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - SQSQueue
+              - Arn
+          batchSize: 5
 
 package:
-  exclude:
-    - node_modules/**
-custom: 
-#  serverless-offline:
-#        httpPort: 4000
-#        lambdaPort: 4002
-  webpack: 
-    webpackConfig: 'webpack.config.js'
+  webpack:
+    webpackConfig: './webpack.config.js'
     includeModules: true
-    packager:  'npm'
-    excludeFiles: ["*.d.js","*.d.ts", "*.py", "/*.test.js"]
-  autoswagger: 
+    packager: 'npm'
+    excludeFiles: ['*.d.js', '*.d.ts', '*.py', '/*.test.js']
+  autoswagger:
     title: 'Product service API'
-    typefiles: ['./src/types/product.ts', './src/types/stock.ts']
+    typefiles: ['./types/product.ts', './types/stock.ts']
     schemes: ['https', 'http']
     basePath: '/dev'
-
+  individually: true
+  # exclude:
+  #   - node_modules/**
 
 resources:
   Resources:
@@ -97,8 +120,39 @@ resources:
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1     
-
+          WriteCapacityUnits: 1
+    SQSQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${env:SQS_QUEUE_NAME}
+    SNSTopic:
+      Type: 'AWS::SNS::Topic'
+      Properties:
+        TopicName: ${env:SNS_TOPIC_NAME}
+    SNSSubscription:
+      Type: 'AWS::SNS::Subscription'
+      Properties:
+        Endpoint: ${env:SNS_SUBSCRIPTION_EMAIL}
+        Protocol: 'email'
+        TopicArn: { Ref: 'SNSTopic' }
+    SNSHighPriceSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: ${env:SNS_HIGH_PRICE_SUBSCRIPTION_EMAIL}
+        TopicArn: { Ref: 'SNSTopic' }
+        FilterPolicy:
+          price:
+            - High
+    SNSLowPriceSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: ${env:SNS_LOW_PRICE_SUBSCRIPTION_EMAIL}
+        TopicArn: { Ref: 'SNSTopic' }
+        FilterPolicy:
+          price:
+            - Low
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
 #    role:
