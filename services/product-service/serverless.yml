@@ -39,6 +39,8 @@ provider:
     SNS_TOPIC_ARN: { Ref: 'SNSTopic' }
     SNS_TOPIC_NAME: ${env:SNS_TOPIC_NAME}
     SNS_SUBSCRIPTION_EMAIL: ${env:SNS_SUBSCRIPTION_EMAIL}
+    SNS_HIGH_PRICE_SUBSCRIPTION_EMAIL: ${env:SNS_HIGH_PRICE_SUBSCRIPTION_EMAIL}
+    SNS_LOW_PRICE_SUBSCRIPTION_EMAIL: ${env:SNS_LOW_PRICE_SUBSCRIPTION_EMAIL}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -92,7 +94,7 @@ package:
     typefiles: ['./types/product.ts', './types/stock.ts']
     schemes: ['https', 'http']
     basePath: '/dev'
-  #individually: true
+  individually: true
   # exclude:
   #   - node_modules/**
 

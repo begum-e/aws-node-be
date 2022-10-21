@@ -1,4 +1,4 @@
-import csvParser from 'csv-parser';
+import csv from 'csv-parser';
 import { S3, SQS } from 'aws-sdk';
 import { middyfy } from '@libs/lambda';
 import { S3Event } from 'aws-lambda';
@@ -7,9 +7,7 @@ import { copySourceTo } from '../helper';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const parser = csvParser();
 const { REGION, BUCKET_NAME, SOURCE_FOLDER, TARGET_FOLDER, SQS_QUEUE_URL } = process.env;
-
 
 export const importFileParser = async (event: S3Event) => {
     console.log(`** FileParser Event : ${JSON.stringify(event)}`);
@@ -40,7 +38,7 @@ export const importFileParser = async (event: S3Event) => {
 
         const result = await new Promise<void>((resolve, reject) => {
             s3Stream
-                .pipe(parser)
+                .pipe(csv())
                 .on("error", (error: any) => {
                     console.error("**  Error:", error)
                     reject(error)
