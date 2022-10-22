@@ -1,21 +1,21 @@
-import csvParser from 'csv-parser';
-import { S3 } from 'aws-sdk';
+import csv from 'csv-parser';
+import { S3, SQS } from 'aws-sdk';
 import { middyfy } from '@libs/lambda';
 import { S3Event } from 'aws-lambda';
 import { copySourceTo } from '../helper';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
-const parser = csvParser();
-const { REGION, BUCKET_NAME, SOURCE_FOLDER, TARGET_FOLDER } = process.env;
-
+const { REGION, BUCKET_NAME, SOURCE_FOLDER, TARGET_FOLDER, SQS_QUEUE_URL } = process.env;
 
 export const importFileParser = async (event: S3Event) => {
     console.log(`** FileParser Event : ${JSON.stringify(event)}`);
 
-    const s3 = new S3({ region: REGION });
-
     try {
+        const s3 = new S3({ region: REGION });
+        const sqs = new SQS({ region: REGION });
+
         const key = event.Records?.[0]?.s3?.object?.key;
         if (!key) {
             return { statusCode: 400, body: "File Not Found" };
@@ -23,7 +23,7 @@ export const importFileParser = async (event: S3Event) => {
 
         console.log("** File:", key);
 
-        if (!key.endsWith('.csv')) {
+        if (!key.endsWith(".csv")) {
             console.log("** Skipping non csv files ** ");
         }
 
@@ -38,13 +38,20 @@ export const importFileParser = async (event: S3Event) => {
 
         const result = await new Promise<void>((resolve, reject) => {
             s3Stream
-                .pipe(parser)
-                .on("error", error => {
+                .pipe(csv())
+                .on("error", (error: any) => {
                     console.error("**  Error:", error)
                     reject(error)
                 })
-                .on("data", data => {
+                .on("data", (data: any) => {
                     console.log("** Data:", data)
+                    sqs.sendMessage({
+                        QueueUrl: SQS_QUEUE_URL || '',
+                        MessageBody: JSON.stringify(data)
+                    }, (err, data) => {
+                        if (err) console.error('** sendMessage error:', err);
+                        console.log('** sendMessage data:', data);
+                    });
                 })
                 .on("end", async () => {
                     console.log(`** Copy Started: ${key}`)

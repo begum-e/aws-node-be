@@ -7,6 +7,7 @@ const serverlessConfiguration: AWS = {
   service: 'import-service',
   frameworkVersion: '3',
   plugins: ['serverless-esbuild'],
+  useDotenv: true,
   provider: {
     name: 'aws',
     runtime: 'nodejs14.x',
@@ -19,19 +20,29 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
-      BUCKET_NAME: 'importservice-bucket'
+      BUCKET_NAME: '${env:BUCKET_NAME}',
+      TARGET_FOLDER: '${env:TARGET_FOLDER}',
+      SOURCE_FOLDER: '${env:SOURCE_FOLDER}',
+      REGION: '${env:REGION }',
+      SQS_QUEUE_NAME: '${env:SQS_QUEUE_NAME}',
+      SQS_QUEUE_URL: '${env:SQS_QUEUE_URL}',
+
     },
     iamRoleStatements: [
       {
         Effect: 'Allow',
         Action: 's3:ListBucket',
-        Resource: "arn:aws:s3:::importservice-bucket",
+        Resource: 'arn:aws:s3:::${env:BUCKET_NAME}',
       },
       {
         Effect: 'Allow',
         Action: 's3:*',
-        Resource: `arn:aws:s3:::importservice-bucket/*`,
-      },
+        Resource: 'arn:aws:s3:::${env:BUCKET_NAME}/*',
+      }, {
+        Effect: 'Allow',
+        Action: ['sqs:*'],
+        Resource: '${env:SQS_ARN}'
+      }
     ],
   },
   // imported the configs via paths which is in @functions/index

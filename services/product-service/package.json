@@ -7,9 +7,10 @@
     "scripts": {
         "build": "webpack",
         "deploy": "serverless deploy",
+        "test": "jest  --detectOpenHandles --forceExit",
+        "package": "serverless package",
         "createTable": "npm run ./scripts/createTable.js",
         "fillTables": "npm run ./scripts/fillTables.js",
-        "test": "node --experimental-modules --experimental-vm-modules node_modules/jest/bin/jest.js",
         "offline": "sls offline --noPrependStageInUrl",
         "offline-start": "serverless offline start"
     },
@@ -19,14 +20,18 @@
         "serverless-webpack": "^5.9.1",
         "webpack": "^5.74.0",
         "webpack-node-externals": "^3.0.0",
+        "uuid": "^9.0.0",
         "@aws-sdk/lib-dynamodb": "^3.181.0",
-        "uuid": "^9.0.0"
+        "@aws-sdk/client-dynamodb": "^3.180.0"
     },
     "devDependencies": {
+        "aws-sdk-mock": "^5.8.0",
         "jest": "^29.0.3",
         "serverless-auto-swagger": "^2.8.2",
         "serverless-offline": "^10.1.0",
-        "webpack-cli": "^4.10.0"
+        "webpack-cli": "^4.10.0",
+        "aws-sdk": "^2.1227.0",
+        "dotenv": "^16.0.3"
     },
     "license": "ISC"
 }
