@@ -6,6 +6,9 @@ jspm_packages
 .serverless
 
 swagger
-.env
+.env*
 .vscode
 .DS_Store
+# webpack related
+.webpack
+handler.js

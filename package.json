@@ -1,0 +1,12 @@
+{
+  "name": "aws-shop-be",
+  "version": "1.0.0",
+  "description": "Packaged externals for aws-shop-be",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.181.0",
+    "dotenv": "^16.0.3",
+    "uuid": "^9.0.0"
+  }
+}

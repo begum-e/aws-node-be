@@ -35,7 +35,8 @@ const importProductsFile = async (event: APIGatewayProxyEvent) => {
     return {
       statusCode: 200,
       headers: {
-        'access-control-allow-origin': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
       },
       body: JSON.stringify({ signedUrl })
     }
