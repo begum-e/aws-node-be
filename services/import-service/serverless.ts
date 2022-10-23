@@ -15,18 +15,17 @@ const serverlessConfiguration: AWS = {
     stage: 'dev',
     apiGateway: {
       minimumCompressionSize: 1024,
-      shouldStartNameWithService: true,
+      shouldStartNameWithService: true
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       BUCKET_NAME: '${env:BUCKET_NAME}',
       TARGET_FOLDER: '${env:TARGET_FOLDER}',
       SOURCE_FOLDER: '${env:SOURCE_FOLDER}',
-      REGION: '${env:REGION }',
+      REGION: '${env:REGION}',
       SQS_QUEUE_NAME: '${env:SQS_QUEUE_NAME}',
       SQS_QUEUE_URL: '${env:SQS_QUEUE_URL}',
-
+      AUTHORIZER_LAMBDA_ARN: '${env:AUTHORIZER_LAMBDA_ARN}'
     },
     iamRoleStatements: [
       {
@@ -42,7 +41,14 @@ const serverlessConfiguration: AWS = {
         Effect: 'Allow',
         Action: ['sqs:*'],
         Resource: '${env:SQS_ARN}'
-      }
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "lambda:InvokeFunction"
+        ],
+        Resource: '${env:AUTHORIZER_LAMBDA_ARN}',
+      },
     ],
   },
   // imported the configs via paths which is in @functions/index
