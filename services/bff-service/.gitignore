@@ -1,5 +1,9 @@
 .vscode/*
+
 .env
+!.env.example
+
 .elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+.ebextensions
+
+builds
