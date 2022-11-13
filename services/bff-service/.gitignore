@@ -1,0 +1,9 @@
+.vscode/*
+
+.env
+!.env.example
+
+.elasticbeanstalk/*
+.ebextensions
+
+builds
